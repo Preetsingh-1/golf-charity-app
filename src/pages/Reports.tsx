@@ -3,23 +3,22 @@ import AdminLayout from "../components/AdminLayout";
 export default function Reports() {
   return (
     <AdminLayout>
-
-      <div className="page-heading">
-
-        <span className="eyebrow">
-          REPORTS & ANALYTICS
-        </span>
+      <div className="admin-page-heading page-heading">
+        <span className="eyebrow">REPORTS & ANALYTICS</span>
 
         <h1>Reports</h1>
 
-        <p>
-          Overview of platform performance.
-        </p>
+        <p>Overview of platform performance.</p>
 
+        <div className="page-heading-meta">
+          <span className="page-meta-chip page-meta-chip--positive">
+            Live overview
+          </span>
+          <span className="page-meta-chip">September 2026</span>
+        </div>
       </div>
 
-      <div className="dashboard-stats">
-
+      <div className="dashboard-stats reports-stats">
         <div className="stat-card">
           <span>♙</span>
           <p>Total Users</p>
@@ -43,14 +42,17 @@ export default function Reports() {
           <p>Total Draws</p>
           <strong>12</strong>
         </div>
-
       </div>
 
       <div className="reports-grid">
-
-        <div className="panel">
-
-          <h2>Draw statistics</h2>
+        <div className="panel report-panel">
+          <div className="report-panel-heading">
+            <div>
+              <span className="panel-kicker">PERFORMANCE</span>
+              <h2>Draw statistics</h2>
+            </div>
+            <span className="report-panel-icon">↗</span>
+          </div>
 
           <div className="report-row">
             <span>Draws completed</span>
@@ -66,12 +68,16 @@ export default function Reports() {
             <span>Prizes distributed</span>
             <strong>₹8.4L</strong>
           </div>
-
         </div>
 
-        <div className="panel">
-
-          <h2>Charity impact</h2>
+        <div className="panel report-panel report-panel--impact">
+          <div className="report-panel-heading">
+            <div>
+              <span className="panel-kicker">GIVING BACK</span>
+              <h2>Charity impact</h2>
+            </div>
+            <span className="report-panel-icon">♥</span>
+          </div>
 
           <div className="report-row">
             <span>Total contributions</span>
@@ -87,11 +93,8 @@ export default function Reports() {
             <span>Subscribers supporting charity</span>
             <strong>980</strong>
           </div>
-
         </div>
-
       </div>
-
     </AdminLayout>
   );
 }

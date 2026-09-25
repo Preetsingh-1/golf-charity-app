@@ -9,25 +9,26 @@ const winners = [
 export default function VerifyWinners() {
   return (
     <AdminLayout>
-
-      <div className="page-heading">
-
-        <span className="eyebrow">
-          WINNER MANAGEMENT
-        </span>
+      <div className="admin-page-heading page-heading">
+        <span className="eyebrow">WINNER MANAGEMENT</span>
 
         <h1>Verify Winners</h1>
 
-        <p>
-          Review winner submissions and payouts.
-        </p>
+        <p>Review winner submissions and payouts.</p>
 
+        <div className="page-heading-meta">
+          <span className="page-meta-chip page-meta-chip--warning">
+            2 pending reviews
+          </span>
+          <span className="page-meta-chip page-meta-chip--positive">
+            1 approved
+          </span>
+          <span className="page-meta-chip">₹1,55,000 total prizes</span>
+        </div>
       </div>
 
       <div className="panel table-container">
-
-        <table>
-
+        <table className="table">
           <thead>
             <tr>
               <th>User</th>
@@ -39,11 +40,8 @@ export default function VerifyWinners() {
           </thead>
 
           <tbody>
-
             {winners.map((winner) => (
-
               <tr key={winner[0]}>
-
                 <td>{winner[0]}</td>
 
                 <td>{winner[1]}</td>
@@ -51,27 +49,23 @@ export default function VerifyWinners() {
                 <td>{winner[2]}</td>
 
                 <td>
-                  <a href="#">
-                    View
+                  <a className="table-action" href="#">
+                    Review proof
                   </a>
                 </td>
 
                 <td>
-                  <span className="status">
+                  <span
+                    className={`status ${winner[3] === "Approved" ? "active" : "pending"}`}
+                  >
                     {winner[3]}
                   </span>
                 </td>
-
               </tr>
-
             ))}
-
           </tbody>
-
         </table>
-
       </div>
-
     </AdminLayout>
   );
 }

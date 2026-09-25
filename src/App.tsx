@@ -3,36 +3,28 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+
 import Subscription from "./pages/Subscription";
+import Payment from "./pages/Payment";
 import CharitySelection from "./pages/CharitySelection";
+import CharityDirectory from "./pages/CharityDirectory";
+import CharityDetails from "./pages/CharityDetails";
 import Dashboard from "./pages/Dashboard";
 import AddScore from "./pages/AddScore";
 import DrawResults from "./pages/DrawResults";
 import WinnerVerification from "./pages/WinnerVerification";
+import ProfileSettings from "./pages/ProfileSettings";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ManageDraw from "./pages/ManageDraw";
 import VerifyWinners from "./pages/VerifyWinners";
 import ManageCharities from "./pages/ManageCharities";
-
-// import Payment from "./pages/Payment";
-// import CharityDirectory from "./pages/CharityDirectory";
-// import CharityDetails from "./pages/CharityDetails";
-// import ProfileSettings from "./pages/ProfileSettings";
-
-// import Users from "./pages/Users";
-// import Subscriptions from "./pages/Subscriptions";
-// import Reports from "./pages/Reports";
-
-import AdminLayout from "./components/AdminLayout";
-import Payment from "./pages/Payment";
-import CharityDirectory from "./pages/CharityDirectory";
-import CharityDetails from "./pages/CharityDetails";
-import ProfileSettings from "./pages/ProfileSettings";
 import Users from "./pages/Users";
 import Subscriptions from "./pages/Subscriptions";
 import Reports from "./pages/Reports";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -40,74 +32,127 @@ function App() {
 
       {/* ================= PUBLIC ================= */}
 
-      <Route path="/" element={<Home />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-
-      {/* ================= USER ================= */}
-
-      <Route path="/subscription" element={<Subscription />} />
-      <Route path="/payment" element={<Payment />} />
-      <Route path="/charity-selection" element={<CharitySelection />} />
-
-      <Route path="/charities" element={<CharityDirectory />} />
-      <Route path="/charities/:id" element={<CharityDetails />} />
-
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/scores/add" element={<AddScore />} />
-      <Route path="/draw-results" element={<DrawResults />} />
       <Route
-        path="/winner-verification"
-        element={<WinnerVerification />}
+        path="/"
+        element={<Home />}
       />
-      <Route path="/profile" element={<ProfileSettings />} />
 
-      {/* ================= ADMIN LOGIN ================= */}
+      <Route
+        path="/signup"
+        element={<Signup />}
+      />
 
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/login"
+        element={<Login />}
+      />
 
-      {/* ================= ADMIN PANEL ================= */}
+      <Route
+        path="/charities"
+        element={<CharityDirectory />}
+      />
 
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route
+        path="/charities/:id"
+        element={<CharityDetails />}
+      />
 
-        {/* /admin */}
-        <Route index element={<AdminDashboard />} />
+      {/* ================= PROTECTED USER ================= */}
 
-        {/* /admin/users */}
-        <Route path="users" element={<Users />} />
+      <Route element={<ProtectedRoute />}>
 
-        {/* /admin/subscriptions */}
         <Route
-          path="subscriptions"
-          element={<Subscriptions />}
+          path="/subscription"
+          element={<Subscription />}
         />
 
-        {/* /admin/draw */}
-        <Route path="draw" element={<ManageDraw />} />
-
-        {/* /admin/charities */}
         <Route
-          path="charities"
-          element={<ManageCharities />}
+          path="/payment"
+          element={<Payment />}
         />
 
-        {/* /admin/winners */}
         <Route
-          path="winners"
-          element={<VerifyWinners />}
+          path="/charity-selection"
+          element={<CharitySelection />}
         />
 
-        {/* /admin/reports */}
         <Route
-          path="reports"
-          element={<Reports />}
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/scores/add"
+          element={<AddScore />}
+        />
+
+        <Route
+          path="/draw-results"
+          element={<DrawResults />}
+        />
+
+        <Route
+          path="/winner-verification"
+          element={<WinnerVerification />}
+        />
+
+        <Route
+          path="/profile"
+          element={<ProfileSettings />}
         />
 
       </Route>
 
+      {/* ================= ADMIN LOGIN ================= */}
+
+      <Route
+        path="/admin/login"
+        element={<AdminLogin />}
+      />
+
+      {/* ================= ADMIN ================= */}
+
+      <Route
+        path="/admin"
+        element={<AdminDashboard />}
+      />
+
+      <Route
+        path="/admin/users"
+        element={<Users />}
+      />
+
+      <Route
+        path="/admin/subscriptions"
+        element={<Subscriptions />}
+      />
+
+      <Route
+        path="/admin/draw"
+        element={<ManageDraw />}
+      />
+
+      <Route
+        path="/admin/charities"
+        element={<ManageCharities />}
+      />
+
+      <Route
+        path="/admin/winners"
+        element={<VerifyWinners />}
+      />
+
+      <Route
+        path="/admin/reports"
+        element={<Reports />}
+      />
+
       {/* ================= FALLBACK ================= */}
 
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
 
     </Routes>
   );

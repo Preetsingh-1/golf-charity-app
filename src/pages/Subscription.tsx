@@ -1,7 +1,133 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
+import { supabase } from "../lib/supabaseClient";
+
+type Plan = "monthly" | "yearly";
+
+type SubscriptionRecord = {
+  id: string;
+  plan: Plan;
+  status: string;
+  amount: number;
+};
 
 export default function Subscription() {
+  const navigate = useNavigate();
+
+  const [selectedPlan, setSelectedPlan] = useState<Plan>("monthly");
+  const [subscription, setSubscription] =
+    useState<SubscriptionRecord | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [selecting, setSelecting] = useState(false);
+  const [error, setError] = useState("");
+
+  const monthlyAmount = 999;
+  const yearlyAmount = 9999;
+
+  useEffect(() => {
+    loadSubscription();
+  }, []);
+
+  const loadSubscription = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("id, plan, status, amount")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error(error);
+        setError("Unable to load your subscription.");
+        return;
+      }
+
+      if (data) {
+        setSubscription(data);
+        setSelectedPlan(data.plan);
+      }
+    } catch (error) {
+      console.error(error);
+      setError("Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectPlan = async (plan: Plan) => {
+    try {
+      setSelecting(true);
+      setError("");
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
+      const amount =
+        plan === "monthly" ? monthlyAmount : yearlyAmount;
+
+      /*
+       * Save the selected plan temporarily.
+       * The actual payment/activation will be handled
+       * by the Payment page.
+       */
+      localStorage.setItem(
+        "selectedSubscription",
+        JSON.stringify({
+          plan,
+          amount,
+        })
+      );
+
+      setSelectedPlan(plan);
+
+      navigate("/payment");
+    } catch (error) {
+      console.error(error);
+      setError("Unable to continue. Please try again.");
+    } finally {
+      setSelecting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="center-page">
+        <div className="page-container">
+          <Logo />
+
+          <div className="page-heading">
+            <span className="eyebrow">SUBSCRIPTION</span>
+            <h1>Loading...</h1>
+            <p>Checking your subscription.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="center-page">
 
@@ -9,9 +135,13 @@ export default function Subscription() {
 
         <Logo />
 
-        <a href="/signup" className="back">
+        <button
+          type="button"
+          className="back"
+          onClick={() => navigate(-1)}
+        >
           ← Back
-        </a>
+        </button>
 
         <div className="page-heading">
 
@@ -27,9 +157,36 @@ export default function Subscription() {
 
         </div>
 
+        {subscription && (
+          <div className="secure">
+            Current subscription:{" "}
+            <strong>
+              {subscription.plan === "monthly"
+                ? "Monthly"
+                : "Yearly"}
+            </strong>{" "}
+            — {subscription.status}
+          </div>
+        )}
+
+        {error && (
+          <p className="form-error">
+            {error}
+          </p>
+        )}
+
         <div className="plans">
 
-          <div className="plan selected">
+          {/* MONTHLY */}
+
+          <div
+            className={`plan ${
+              selectedPlan === "monthly"
+                ? "selected"
+                : ""
+            }`}
+            onClick={() => setSelectedPlan("monthly")}
+          >
 
             <span className="plan-label">
               MONTHLY
@@ -45,13 +202,30 @@ export default function Subscription() {
               <li>Support a charity</li>
             </ul>
 
-            <Button to="/charity-selection">
-              Select Plan
+            <Button
+              type="button"
+              onClick={() =>
+                handleSelectPlan("monthly")
+              }
+              disabled={selecting}
+            >
+              {selecting && selectedPlan === "monthly"
+                ? "Continuing..."
+                : "Select Plan"}
             </Button>
 
           </div>
 
-          <div className="plan">
+          {/* YEARLY */}
+
+          <div
+            className={`plan ${
+              selectedPlan === "yearly"
+                ? "selected"
+                : ""
+            }`}
+            onClick={() => setSelectedPlan("yearly")}
+          >
 
             <span className="plan-label">
               YEARLY
@@ -68,10 +242,16 @@ export default function Subscription() {
             </ul>
 
             <Button
-              to="/charity-selection"
+              type="button"
               variant="secondary"
+              onClick={() =>
+                handleSelectPlan("yearly")
+              }
+              disabled={selecting}
             >
-              Select Plan
+              {selecting && selectedPlan === "yearly"
+                ? "Continuing..."
+                : "Select Plan"}
             </Button>
 
           </div>

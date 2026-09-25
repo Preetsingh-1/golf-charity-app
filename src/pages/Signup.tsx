@@ -1,73 +1,179 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
+import { supabase } from "../lib/supabaseClient";
 
 export default function Signup() {
+  const navigate = useNavigate();
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setError("");
+
+    if (!fullName.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+          },
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      /*
+       * If email confirmation is disabled,
+       * Supabase creates a session immediately.
+       */
+      if (data.session) {
+        navigate("/subscription");
+        return;
+      }
+
+      /*
+       * If email confirmation is enabled,
+       * user needs to verify their email first.
+       */
+      setError(
+        "Account created. Please check your email to confirm your account."
+      );
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="auth-page">
+    <div className="auth-page signup-page">
+      <aside className="signup-showcase">
+        <div className="signup-showcase-top">
+          <Logo />
+          <span className="showcase-badge">A BETTER WAY TO PLAY</span>
+        </div>
+
+        <div className="signup-showcase-copy">
+          <span className="eyebrow">
+            ONE SUBSCRIPTION. THREE WAYS TO MAKE AN IMPACT.
+          </span>
+
+          <h2>Good golf does more good.</h2>
+
+          <p>
+            Join a community turning their scorecards into meaningful support
+            for charities across the country.
+          </p>
+        </div>
+
+        <div className="signup-steps" aria-label="How Digital Heroes works">
+          <span>
+            <b>01</b> Play your round
+          </span>
+
+          <span>
+            <b>02</b> Join the draw
+          </span>
+
+          <span>
+            <b>03</b> Give back
+          </span>
+        </div>
+      </aside>
 
       <div className="auth-card">
-
         <Logo />
 
         <div className="auth-heading">
-
-          <span className="eyebrow">
-            CREATE ACCOUNT
-          </span>
+          <span className="eyebrow">CREATE ACCOUNT</span>
 
           <h1>Create your account</h1>
 
-          <p>
-            Join Digital Heroes and play for a bigger purpose.
-          </p>
-
+          <p>Join Digital Heroes and play for a bigger purpose.</p>
         </div>
 
-        <form className="form">
+        <form className="form" onSubmit={handleSignup}>
+          <label className="signup-field">
+            <span>Full name</span>
 
-          <label>
-            Full Name
-            <input placeholder="Your full name" />
+            <input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Your full name"
+              autoComplete="name"
+            />
           </label>
 
-          <label>
-            Email
+          <label className="signup-field">
+            <span>Email address</span>
+
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
+              autoComplete="email"
             />
           </label>
 
-          <label>
-            Password
+          <label className="signup-field">
+            <span>Password</span>
+
             <input
               type="password"
-              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a secure password"
+              autoComplete="new-password"
             />
           </label>
 
-          <Button to="/subscription">
-            Sign Up
-          </Button>
+          {error && <p className="form-error">{error}</p>}
 
+          <Button type="submit" disabled={loading}>
+            {loading ? "Creating account..." : "Sign Up"}
+          </Button>
         </form>
 
         <p className="form-footer">
-          Already have an account?{" "}
-          <Link to="/login">
-            Login
-          </Link>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
-
       </div>
 
       <div className="auth-image">
-        <span>
-          “Small swings can create big change.”
-        </span>
+        <span>“Small swings can create big change.”</span>
       </div>
-
     </div>
   );
 }

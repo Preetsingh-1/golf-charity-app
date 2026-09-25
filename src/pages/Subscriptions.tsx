@@ -10,25 +10,24 @@ const subscriptions = [
 export default function Subscriptions() {
   return (
     <AdminLayout>
-
-      <div className="page-heading">
-
-        <span className="eyebrow">
-          SUBSCRIPTION MANAGEMENT
-        </span>
+      <div className="admin-page-heading page-heading">
+        <span className="eyebrow">SUBSCRIPTION MANAGEMENT</span>
 
         <h1>Subscriptions</h1>
 
-        <p>
-          Monitor subscriber plans and renewal status.
-        </p>
+        <p>Monitor subscriber plans and renewal status.</p>
 
+        <div className="page-heading-meta">
+          <span className="page-meta-chip">4 total plans</span>
+          <span className="page-meta-chip page-meta-chip--positive">
+            3 active
+          </span>
+          <span className="page-meta-chip">₹12,996 monthly value</span>
+        </div>
       </div>
 
       <div className="panel table-container">
-
         <div className="table-toolbar">
-
           <input placeholder="Search subscribers..." />
 
           <select>
@@ -36,11 +35,9 @@ export default function Subscriptions() {
             <option>Active</option>
             <option>Inactive</option>
           </select>
-
         </div>
 
-        <table>
-
+        <table className="table">
           <thead>
             <tr>
               <th>User</th>
@@ -52,32 +49,29 @@ export default function Subscriptions() {
           </thead>
 
           <tbody>
-
             {subscriptions.map((item) => (
-
               <tr key={item[0]}>
-
                 <td>{item[0]}</td>
                 <td>{item[1]}</td>
-                <td>{item[2]}</td>
+                <td>
+                  <strong className="table-amount">{item[2]}</strong>
+                </td>
                 <td>{item[3]}</td>
 
                 <td>
-                  <span className="status">
+                  <span
+                    className={`status ${
+                      item[4] === "Active" ? "active" : "inactive"
+                    }`}
+                  >
                     {item[4]}
                   </span>
                 </td>
-
               </tr>
-
             ))}
-
           </tbody>
-
         </table>
-
       </div>
-
     </AdminLayout>
   );
 }
