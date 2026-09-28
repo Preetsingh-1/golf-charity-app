@@ -847,6 +847,25 @@ button {
   background: #fff;
   box-shadow: 0 0 0 4px rgba(123, 213, 154, 0.18);
 }
+.admin-login-page .auth-form {
+  display: grid;
+  gap: 18px;
+}
+.admin-login-page .auth-form .btn {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+.admin-login-page .auth-form .form-error {
+  margin: 0;
+  padding: 11px 13px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+.admin-login-page .auth-card > .logo {
+  margin-bottom: 8px;
+}
 
 .payment-page {
   width: min(960px, 100%);
@@ -2256,6 +2275,24 @@ button {
 .verification-page .page-heading h1 {
   color: var(--green-900);
 }
+.verification-heading {
+  margin-bottom: 28px;
+}
+.verification-heading p {
+  max-width: 460px;
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.verification-page .winner-grid {
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 18px;
+}
+.verification-page .winner-grid > .panel {
+  border: 1px solid #e4ede7;
+  border-radius: 18px;
+  box-shadow: 0 18px 38px rgba(12, 45, 41, 0.06);
+}
 .prize-card {
   display: flex;
   flex-direction: column;
@@ -2268,6 +2305,137 @@ button {
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.12em;
+}
+.prize-card .prize-match-label {
+  margin-top: 22px;
+  padding: 7px 12px;
+  border: 1px solid #ccebd6;
+  border-radius: 999px;
+  color: #176d59;
+  background: #eaf8ee;
+  font-size: 10px;
+  font-weight: 800;
+}
+.prize-card .prize-amount-label {
+  margin-top: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.prize-card h2 {
+  margin: 5px 0 10px;
+  font-size: 38px;
+}
+.prize-card p:not(.prize-amount-label) {
+  margin-top: 12px;
+  font-size: 10px;
+}
+.pending-status {
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.45;
+}
+.pending-status.verification-paid,
+.pending-status.verification-approved {
+  color: #146d55;
+  background: #e2f7e9;
+}
+.pending-status.verification-rejected {
+  color: #9b4141;
+  background: #fff0f0;
+}
+.verification-steps {
+  gap: 12px;
+  margin-top: 24px;
+}
+.verification-steps span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.verification-message {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.verification-message--error {
+  border-color: #f0c4c4;
+  color: #9b4141;
+  background: #fff5f5;
+}
+.verification-message--success {
+  border-color: #bfe8cf;
+  color: #145e4a;
+  background: #f2fff6;
+}
+.proof-submitted {
+  margin: 20px 0 16px;
+  padding: 18px;
+  border: 1px solid #dcece1;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f7fcf8, #eef8f1);
+}
+.proof-submitted > strong {
+  color: var(--green-900);
+  font-size: 13px;
+}
+.proof-submitted p {
+  margin: 10px 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.proof-link {
+  display: inline-flex;
+  margin-top: 6px;
+  color: var(--green-700);
+  font-size: 11px;
+  font-weight: 800;
+}
+.proof-link:hover {
+  color: var(--green-900);
+  text-decoration: underline;
+}
+.verification-page .upload-box {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  justify-items: center;
+  padding: 22px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+.verification-page .upload-box:hover {
+  transform: translateY(-2px);
+  border-color: var(--green-700);
+  background: #eff9f2;
+}
+.verification-page .upload-icon {
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 8px 18px rgba(22, 116, 91, 0.12);
+}
+.verification-page .upload-panel .btn {
+  min-height: 48px;
+}
+.verification-page .form-error {
+  margin-bottom: 18px;
+}
+.verification-empty {
+  padding: 28px;
+  border: 1px solid #e4ede7;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 38px rgba(12, 45, 41, 0.06);
 }
 .prize-card > span:not(.prize-kicker) {
   margin-top: 24px;
@@ -2351,6 +2519,9 @@ button {
   .prize-card,
   .upload-panel {
     padding: 22px 18px;
+  }
+  .verification-page .winner-grid {
+    grid-template-columns: 1fr;
   }
   .score-form-footer {
     align-items: stretch;

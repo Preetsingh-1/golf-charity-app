@@ -1,9 +1,7 @@
-import { Link, useParams } from "react-router-dom";
+import { Link} from "react-router-dom";
 import Button from "../components/Button";
 
 export default function CharityDetails() {
-
-  const { id } = useParams();
 
   return (
     <div>

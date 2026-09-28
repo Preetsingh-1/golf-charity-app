@@ -59,29 +59,26 @@ export default function WinnerVerification() {
       /*
        * Find latest winning record.
        */
-      const { data: winnerData, error: winnerError } =
-        await supabase
-          .from("draw_winners")
-          .select(
-            `
+      const { data: winnerData, error: winnerError } = await supabase
+        .from("draw_winners")
+        .select(
+          `
             id,
             draw_id,
             match_count,
             prize_amount,
             payment_status
-          `
-          )
-          .eq("user_id", user.id)
-          .order("created_at", {
-            ascending: false,
-          })
-          .limit(1)
-          .maybeSingle();
+          `,
+        )
+        .eq("user_id", user.id)
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(1)
+        .maybeSingle();
 
       if (winnerError) {
-        throw new Error(
-          `Unable to load winner: ${winnerError.message}`
-        );
+        throw new Error(`Unable to load winner: ${winnerError.message}`);
       }
 
       if (!winnerData) {
@@ -94,12 +91,11 @@ export default function WinnerVerification() {
       /*
        * Get draw information.
        */
-      const { data: drawData, error: drawError } =
-        await supabase
-          .from("draws")
-          .select("draw_month")
-          .eq("id", winnerData.draw_id)
-          .maybeSingle();
+      const { data: drawData, error: drawError } = await supabase
+        .from("draws")
+        .select("draw_month")
+        .eq("id", winnerData.draw_id)
+        .maybeSingle();
 
       if (drawError) {
         console.error(drawError);
@@ -110,23 +106,22 @@ export default function WinnerVerification() {
       /*
        * Get existing proof.
        */
-      const { data: proofData, error: proofError } =
-        await supabase
-          .from("winner_proofs")
-          .select(
-            `
+      const { data: proofData, error: proofError } = await supabase
+        .from("winner_proofs")
+        .select(
+          `
             id,
             proof_url,
             verification_status,
             admin_note
-          `
-          )
-          .eq("winner_id", winnerData.id)
-          .order("created_at", {
-            ascending: false,
-          })
-          .limit(1)
-          .maybeSingle();
+          `,
+        )
+        .eq("winner_id", winnerData.id)
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(1)
+        .maybeSingle();
 
       if (proofError) {
         console.error(proofError);
@@ -139,21 +134,18 @@ export default function WinnerVerification() {
       setError(
         error instanceof Error
           ? error.message
-          : "Unable to load winner information."
+          : "Unable to load winner information.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setError("");
     setMessage("");
 
-    const selectedFile =
-      event.target.files?.[0];
+    const selectedFile = event.target.files?.[0];
 
     if (!selectedFile) {
       return;
@@ -163,21 +155,15 @@ export default function WinnerVerification() {
      * Maximum 5 MB.
      */
     if (selectedFile.size > 5 * 1024 * 1024) {
-      setError(
-        "File size must be less than 5MB."
-      );
+      setError("File size must be less than 5MB.");
       return;
     }
 
     /*
      * Only image files.
      */
-    if (
-      !selectedFile.type.includes("image")
-    ) {
-      setError(
-        "Please upload a PNG or JPG image."
-      );
+    if (!selectedFile.type.includes("image")) {
+      setError("Please upload a PNG or JPG image.");
       return;
     }
 
@@ -186,16 +172,12 @@ export default function WinnerVerification() {
 
   const handleUpload = async () => {
     if (!winner) {
-      setError(
-        "No winning record was found."
-      );
+      setError("No winning record was found.");
       return;
     }
 
     if (!file) {
-      setError(
-        "Please select a screenshot first."
-      );
+      setError("Please select a screenshot first.");
       return;
     }
 
@@ -216,122 +198,97 @@ export default function WinnerVerification() {
       /*
        * Create unique file name.
        */
-      const fileExtension =
-        file.name.split(".").pop() || "jpg";
+      const fileExtension = file.name.split(".").pop() || "jpg";
 
-      const fileName =
-        `${user.id}/${winner.id}-${Date.now()}.${fileExtension}`;
+      const fileName = `${user.id}/${winner.id}-${Date.now()}.${fileExtension}`;
 
       /*
        * Upload image to Supabase Storage.
        */
-      const { error: uploadError } =
-        await supabase.storage
-          .from("winner-proofs")
-          .upload(fileName, file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+      const { error: uploadError } = await supabase.storage
+        .from("winner-proofs")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
 
       if (uploadError) {
-        throw new Error(
-          `Unable to upload proof: ${uploadError.message}`
-        );
+        throw new Error(`Unable to upload proof: ${uploadError.message}`);
       }
 
       /*
        * Get public URL.
        */
-      const { data: publicUrlData } =
-        supabase.storage
-          .from("winner-proofs")
-          .getPublicUrl(fileName);
+      const { data: publicUrlData } = supabase.storage
+        .from("winner-proofs")
+        .getPublicUrl(fileName);
 
-      const proofUrl =
-        publicUrlData.publicUrl;
+      const proofUrl = publicUrlData.publicUrl;
 
       /*
        * Save proof record.
        */
-      const { data: proofData, error: proofError } =
-        await supabase
-          .from("winner_proofs")
-          .insert({
-            winner_id: winner.id,
-            proof_url: proofUrl,
-            verification_status: "pending",
-          })
-          .select(
-            `
+      const { data: proofData, error: proofError } = await supabase
+        .from("winner_proofs")
+        .insert({
+          winner_id: winner.id,
+          proof_url: proofUrl,
+          verification_status: "pending",
+        })
+        .select(
+          `
             id,
             proof_url,
             verification_status,
             admin_note
-          `
-          )
-          .single();
+          `,
+        )
+        .single();
 
       if (proofError) {
-        throw new Error(
-          `Unable to save proof record: ${proofError.message}`
-        );
+        throw new Error(`Unable to save proof record: ${proofError.message}`);
       }
 
       setProof(proofData);
       setFile(null);
 
       setMessage(
-        "Proof uploaded successfully. It is now waiting for admin verification."
+        "Proof uploaded successfully. It is now waiting for admin verification.",
       );
     } catch (error) {
       console.error(error);
 
       setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to upload proof."
+        error instanceof Error ? error.message : "Unable to upload proof.",
       );
     } finally {
       setUploading(false);
     }
   };
 
-  const formatMonth = (
-    month?: string
-  ) => {
+  const formatMonth = (month?: string) => {
     if (!month) {
       return "Latest Draw";
     }
 
-    const date = new Date(
-      `${month.substring(0, 7)}-01T00:00:00`
-    );
+    const date = new Date(`${month.substring(0, 7)}-01T00:00:00`);
 
-    return date.toLocaleDateString(
-      "en-IN",
-      {
-        month: "long",
-        year: "numeric",
-      }
-    );
+    return date.toLocaleDateString("en-IN", {
+      month: "long",
+      year: "numeric",
+    });
   };
 
   if (loading) {
     return (
       <UserLayout>
         <div className="form-page verification-page">
-          <div className="page-heading">
-            <span className="eyebrow">
-              WINNER VERIFICATION
-            </span>
+          <div className="page-heading verification-heading">
+            <span className="eyebrow">WINNER VERIFICATION</span>
 
-            <h1>
-              Loading...
-            </h1>
+            <h1>Loading...</h1>
 
-            <p>
-              Checking your winnings.
-            </p>
+            <p>Checking your winnings.</p>
           </div>
         </div>
       </UserLayout>
@@ -345,41 +302,28 @@ export default function WinnerVerification() {
     return (
       <UserLayout>
         <div className="form-page verification-page">
-
           <button
             type="button"
             className="back"
-            onClick={() =>
-              navigate("/draw-results")
-            }
+            onClick={() => navigate("/draw-results")}
           >
             ← Back
           </button>
 
           <div className="page-heading">
+            <span className="eyebrow">WINNER VERIFICATION</span>
 
-            <span className="eyebrow">
-              WINNER VERIFICATION
-            </span>
-
-            <h1>
-              No winnings yet
-            </h1>
+            <h1>No winnings yet</h1>
 
             <p>
-              You do not currently have a winning
-              draw result requiring verification.
+              You do not currently have a winning draw result requiring
+              verification.
             </p>
-
           </div>
 
-          <Button
-            to="/draw-results"
-            variant="secondary"
-          >
+          <Button to="/draw-results" variant="secondary">
             View Draw Results
           </Button>
-
         </div>
       </UserLayout>
     );
@@ -387,46 +331,27 @@ export default function WinnerVerification() {
 
   return (
     <UserLayout>
-
       <div className="form-page verification-page">
-
         <button
           type="button"
           className="back"
-          onClick={() =>
-            navigate("/draw-results")
-          }
+          onClick={() => navigate("/draw-results")}
         >
           ← Back
         </button>
 
         <div className="page-heading">
+          <span className="eyebrow">WINNER VERIFICATION</span>
 
-          <span className="eyebrow">
-            WINNER VERIFICATION
-          </span>
+          <h1>Congratulations! 🎉</h1>
 
-          <h1>
-            Congratulations! 🎉
-          </h1>
-
-          <p>
-            Your prize is waiting. Verify your
-            scorecard to claim it.
-          </p>
-
+          <p>Your prize is waiting. Verify your scorecard to claim it.</p>
         </div>
 
         {error && (
           <div
-            className="form-error"
-            style={{
-              padding: "14px",
-              marginBottom: "20px",
-              background: "#fff0f0",
-              border: "1px solid #ffcccc",
-              borderRadius: "8px",
-            }}
+            className="verification-message verification-message--error"
+            role="alert"
           >
             {error}
           </div>
@@ -434,124 +359,84 @@ export default function WinnerVerification() {
 
         {message && (
           <div
-            style={{
-              padding: "14px",
-              marginBottom: "20px",
-              background: "#eefaf1",
-              border: "1px solid #b7e4c2",
-              borderRadius: "8px",
-              color: "#287a3d",
-            }}
+            className="verification-message verification-message--success"
+            role="status"
           >
             {message}
           </div>
         )}
 
         <div className="winner-grid">
-
           {/* PRIZE */}
 
           <div className="panel prize-card">
-
             <span className="prize-kicker">
-              {formatMonth(
-                draw?.draw_month
-              ).toUpperCase()} DRAW
+              {formatMonth(draw?.draw_month).toUpperCase()} DRAW
             </span>
 
-            <span>
+            <span className="prize-match-label">
               {winner.match_count} Number Match
             </span>
 
-            <h2>
-              ₹
-              {Number(
-                winner.prize_amount || 0
-              ).toLocaleString("en-IN")}
-            </h2>
+            <p className="prize-amount-label">Your prize</p>
+            <h2>₹{Number(winner.prize_amount || 0).toLocaleString("en-IN")}</h2>
 
-            <p>
-              Payment status
-            </p>
+            <p>Payment status</p>
 
-            <strong className="pending-status">
+            <strong
+              className={`pending-status ${
+                winner.payment_status === "paid"
+                  ? "verification-paid"
+                  : proof?.verification_status === "approved"
+                    ? "verification-approved"
+                    : proof?.verification_status === "rejected"
+                      ? "verification-rejected"
+                      : ""
+              }`}
+            >
               {winner.payment_status === "paid"
                 ? "Paid"
-                : proof?.verification_status ===
-                  "approved"
-                ? "Approved - Payment Pending"
-                : proof?.verification_status ===
-                  "rejected"
-                ? "Proof Rejected"
-                : "Pending verification"}
+                : proof?.verification_status === "approved"
+                  ? "Approved - Payment Pending"
+                  : proof?.verification_status === "rejected"
+                    ? "Proof Rejected"
+                    : "Pending verification"}
             </strong>
 
             <div className="verification-steps">
+              <span className="complete">✓ Score matched</span>
 
-              <span className="complete">
-                ✓ Score matched
-              </span>
-
-              <span
-                className={
-                  proof
-                    ? "complete"
-                    : ""
-                }
-              >
-                {proof
-                  ? "✓ Proof submitted"
-                  : "○ Proof required"}
+              <span className={proof ? "complete" : ""}>
+                {proof ? "✓ Proof submitted" : "○ Proof required"}
               </span>
 
               <span>
-                {winner.payment_status ===
-                "paid"
+                {winner.payment_status === "paid"
                   ? "✓ Payment released"
                   : "○ Payment released"}
               </span>
-
             </div>
-
           </div>
 
           {/* UPLOAD */}
 
           <div className="panel upload-panel">
-
-            <h2>
-              Upload proof
-            </h2>
+            <h2>Upload proof</h2>
 
             <p>
-              Upload a clear screenshot of your
-              golf score for verification.
+              Upload a clear screenshot of your golf score for verification.
             </p>
 
             {proof ? (
-
-              <div
-                style={{
-                  padding: "16px",
-                  border:
-                    "1px solid #dce8e3",
-                  borderRadius: "10px",
-                  marginBottom: "16px",
-                }}
-              >
-
-                <strong>
-                  Proof submitted
-                </strong>
+              <div className="proof-submitted">
+                <strong>Proof submitted</strong>
 
                 <p>
-                  Status:{" "}
-                  <strong>
-                    {proof.verification_status}
-                  </strong>
+                  Status: <strong>{proof.verification_status}</strong>
                 </p>
 
                 <a
+                  className="proof-link"
                   href={proof.proof_url}
                   target="_blank"
                   rel="noreferrer"
@@ -559,77 +444,39 @@ export default function WinnerVerification() {
                   View uploaded proof →
                 </a>
 
-                {proof.admin_note && (
-                  <p>
-                    Admin note:{" "}
-                    {proof.admin_note}
-                  </p>
-                )}
-
+                {proof.admin_note && <p>Admin note: {proof.admin_note}</p>}
               </div>
-
             ) : (
-
               <>
-                <label
-                  className="upload-box"
-                  style={{
-                    cursor: "pointer",
-                    display: "block",
-                  }}
-                >
+                <label className="upload-box">
+                  <span className="upload-icon">↑</span>
 
-                  <span className="upload-icon">
-                    ↑
-                  </span>
+                  <strong>{file ? file.name : "Click to upload"}</strong>
 
-                  <strong>
-                    {file
-                      ? file.name
-                      : "Click to upload"}
-                  </strong>
-
-                  <small>
-                    PNG, JPG — Max 5MB
-                  </small>
+                  <small>PNG, JPG — Max 5MB</small>
 
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/jpg"
-                    onChange={
-                      handleFileChange
-                    }
+                    onChange={handleFileChange}
                     style={{
                       display: "none",
                     }}
                   />
-
                 </label>
 
                 <Button
                   type="button"
-                  onClick={
-                    handleUpload
-                  }
-                  disabled={
-                    uploading ||
-                    !file
-                  }
+                  onClick={handleUpload}
+                  disabled={uploading || !file}
                 >
-                  {uploading
-                    ? "Uploading..."
-                    : "Submit for Verification"}
+                  {uploading ? "Uploading..." : "Submit for Verification"}
                 </Button>
               </>
-
             )}
-
           </div>
-
         </div>
-
       </div>
-
     </UserLayout>
   );
 }
