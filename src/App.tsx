@@ -26,6 +26,7 @@ import Reports from "./pages/Reports";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import Draws from "./pages/Draws";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
 
       <Route path="/charities" element={<CharityDirectory />} />
       <Route path="/charities/:id" element={<CharityDetails />} />
+      <Route path="/draws" element={<Draws />} />
 
       {/* User */}
       <Route element={<ProtectedRoute />}>
