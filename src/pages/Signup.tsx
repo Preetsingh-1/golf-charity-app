@@ -14,67 +14,106 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSignup = async (
+  e: React.FormEvent<HTMLFormElement>
+) => {
+  e.preventDefault();
 
-    setError("");
+  setError("");
 
-    if (!fullName.trim()) {
-      setError("Please enter your full name.");
-      return;
-    }
+  if (!fullName.trim()) {
+    setError("Please enter your full name.");
+    return;
+  }
 
-    if (!email.trim()) {
-      setError("Please enter your email address.");
-      return;
-    }
+  if (!email.trim()) {
+    setError("Please enter your email address.");
+    return;
+  }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+  const normalizedEmail = email.trim().toLowerCase();
 
-    try {
-      setLoading(true);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
-        options: {
-          data: {
-            full_name: fullName.trim(),
-          },
+  if (!emailRegex.test(normalizedEmail)) {
+    setError("Please enter a valid email address.");
+    return;
+  }
+
+  if (password.length < 6) {
+    setError("Password must be at least 6 characters.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
         },
-      });
+      },
+    });
 
-      if (error) {
-        setError(error.message);
-        return;
-      }
+    if (error) {
+      console.error("Signup error:", error);
 
-      /*
-       * If email confirmation is disabled,
-       * Supabase creates a session immediately.
-       */
-      if (data.session) {
-        navigate("/subscription");
-        return;
-      }
-
-      /*
-       * If email confirmation is enabled,
-       * user needs to verify their email first.
-       */
-      setError(
-        "Account created. Please check your email to confirm your account.",
-      );
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+      setError(error.message);
+      return;
     }
-  };
+
+    /*
+     * Supabase can return a successful-looking response
+     * for an email that already exists.
+     *
+     * For an existing email, identities can be an empty array.
+     */
+    if (
+      data.user &&
+      data.user.identities &&
+      data.user.identities.length === 0
+    ) {
+      setError(
+        "Email already exists. Please use a different email or login."
+      );
+      return;
+    }
+
+    /*
+     * Email confirmation disabled:
+     * Supabase creates a session immediately.
+     */
+    if (data.session) {
+      navigate("/subscription");
+      return;
+    }
+
+    /*
+     * New account but email confirmation is enabled.
+     */
+    if (data.user) {
+      setError(
+        "Account created. Please check your email to confirm your account."
+      );
+      return;
+    }
+
+    setError("Unable to create your account. Please try again.");
+  } catch (err) {
+    console.error("Signup error:", err);
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Something went wrong. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-page signup-page">

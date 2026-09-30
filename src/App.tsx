@@ -27,6 +27,8 @@ import Reports from "./pages/Reports";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import Draws from "./pages/Draws";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
@@ -39,22 +41,18 @@ function App() {
       <Route path="/charities" element={<CharityDirectory />} />
       <Route path="/charities/:id" element={<CharityDetails />} />
       <Route path="/draws" element={<Draws />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* User */}
       <Route element={<ProtectedRoute />}>
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/payment" element={<Payment />} />
-        <Route
-          path="/charity-selection"
-          element={<CharitySelection />}
-        />
+        <Route path="/charity-selection" element={<CharitySelection />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/scores/add" element={<AddScore />} />
         <Route path="/draw-results" element={<DrawResults />} />
-        <Route
-          path="/winner-verification"
-          element={<WinnerVerification />}
-        />
+        <Route path="/winner-verification" element={<WinnerVerification />} />
         <Route path="/profile" element={<ProfileSettings />} />
       </Route>
 
@@ -65,26 +63,14 @@ function App() {
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<Users />} />
-        <Route
-          path="/admin/subscriptions"
-          element={<Subscriptions />}
-        />
+        <Route path="/admin/subscriptions" element={<Subscriptions />} />
         <Route path="/admin/draw" element={<ManageDraw />} />
-        <Route
-          path="/admin/charities"
-          element={<ManageCharities />}
-        />
-        <Route
-          path="/admin/winners"
-          element={<VerifyWinners />}
-        />
+        <Route path="/admin/charities" element={<ManageCharities />} />
+        <Route path="/admin/winners" element={<VerifyWinners />} />
         <Route path="/admin/reports" element={<Reports />} />
       </Route>
 
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
