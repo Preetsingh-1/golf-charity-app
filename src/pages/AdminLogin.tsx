@@ -65,7 +65,7 @@ export default function AdminLogin() {
     <div className="auth-page admin-login-page">
       <aside className="admin-login-aside">
         <Logo />
-        <span className="eyebrow">DIGITAL HEROES ADMIN</span>
+        <span className="eyebrow">GOLF FOR GOOD ADMIN</span>
         <h2>Lead with impact.</h2>
         <p>
           Manage the community, monthly draws, and the good they make possible.
@@ -76,7 +76,7 @@ export default function AdminLogin() {
         <div className="auth-heading">
           <span className="eyebrow">ADMIN PORTAL</span>
           <h1>Admin Login</h1>
-          <p>Sign in to manage the Digital Heroes platform.</p>
+          <p>Sign in to manage the Golf for Good platform.</p>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">

@@ -78,7 +78,7 @@ export default function Login() {
 
           <h1>Welcome back</h1>
 
-          <p>Access your Digital Heroes account.</p>
+          <p>Access your Golf for Good account.</p>
         </div>
 
         <form className="form" onSubmit={handleLogin}>

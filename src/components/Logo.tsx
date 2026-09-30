@@ -4,7 +4,7 @@ export default function Logo() {
   return (
     <Link to="/" className="logo">
       <span className="logo-icon">✦</span>
-      <span>Digital Heroes</span>
+      <span>Golf for Good</span>
     </Link>
   );
 }

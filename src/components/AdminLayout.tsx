@@ -38,7 +38,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   return (
     <div className="dashboard-layout">
       <aside className="sidebar">
-        <div className="sidebar-logo">Digital Heroess</div>
+        <div className="sidebar-logo">Golf for Good</div>
 
         <nav>
           <NavLink to="/admin">Dashboard</NavLink>

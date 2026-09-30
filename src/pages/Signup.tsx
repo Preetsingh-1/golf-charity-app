@@ -66,7 +66,7 @@ export default function Signup() {
        * user needs to verify their email first.
        */
       setError(
-        "Account created. Please check your email to confirm your account."
+        "Account created. Please check your email to confirm your account.",
       );
     } catch (err) {
       console.error(err);
@@ -97,7 +97,7 @@ export default function Signup() {
           </p>
         </div>
 
-        <div className="signup-steps" aria-label="How Digital Heroes works">
+        <div className="signup-steps" aria-label="How Golf for Good works">
           <span>
             <b>01</b> Play your round
           </span>
@@ -120,7 +120,7 @@ export default function Signup() {
 
           <h1>Create your account</h1>
 
-          <p>Join Digital Heroes and play for a bigger purpose.</p>
+          <p>Join Golf for Good and play for a bigger purpose.</p>
         </div>
 
         <form className="form" onSubmit={handleSignup}>
