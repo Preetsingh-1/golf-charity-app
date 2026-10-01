@@ -13,6 +13,7 @@ export default function AddScore() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [scoreError, setScoreError] = useState("");
 
   const handleSaveScore = async () => {
     setError("");
@@ -64,25 +65,22 @@ export default function AddScore() {
        * Check whether the user already has a score
        * for this date.
        */
-      const { data: existingScore, error: existingError } =
-        await supabase
-          .from("scores")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("played_at", date)
-          .maybeSingle();
+      const { data: existingScore, error: existingError } = await supabase
+        .from("scores")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("played_at", date)
+        .maybeSingle();
 
       if (existingError) {
         console.error(existingError);
-        setError(
-          `Unable to check existing scores: ${existingError.message}`
-        );
+        setError(`Unable to check existing scores: ${existingError.message}`);
         return;
       }
 
       if (existingScore) {
         setError(
-          "You already have a score for this date. Only one score is allowed per date."
+          "You already have a score for this date. Only one score is allowed per date.",
         );
         return;
       }
@@ -90,20 +88,16 @@ export default function AddScore() {
       /*
        * Insert the new score.
        */
-      const { error: insertError } = await supabase
-        .from("scores")
-        .insert({
-          user_id: user.id,
-          score: numericScore,
-          played_at: date,
-        });
+      const { error: insertError } = await supabase.from("scores").insert({
+        user_id: user.id,
+        score: numericScore,
+        played_at: date,
+      });
 
       if (insertError) {
         console.error(insertError);
 
-        setError(
-          `Unable to save score: ${insertError.message}`
-        );
+        setError(`Unable to save score: ${insertError.message}`);
 
         return;
       }
@@ -111,19 +105,18 @@ export default function AddScore() {
       /*
        * Get all scores ordered newest → oldest.
        */
-      const { data: allScores, error: scoresError } =
-        await supabase
-          .from("scores")
-          .select("id, played_at")
-          .eq("user_id", user.id)
-          .order("played_at", {
-            ascending: false,
-          });
+      const { data: allScores, error: scoresError } = await supabase
+        .from("scores")
+        .select("id, played_at")
+        .eq("user_id", user.id)
+        .order("played_at", {
+          ascending: false,
+        });
 
       if (scoresError) {
         console.error(scoresError);
         setError(
-          `Score saved, but unable to update score history: ${scoresError.message}`
+          `Score saved, but unable to update score history: ${scoresError.message}`,
         );
         return;
       }
@@ -137,9 +130,7 @@ export default function AddScore() {
       if (allScores && allScores.length > 5) {
         const scoresToDelete = allScores.slice(5);
 
-        const idsToDelete = scoresToDelete.map(
-          (item) => item.id
-        );
+        const idsToDelete = scoresToDelete.map((item) => item.id);
 
         const { error: deleteError } = await supabase
           .from("scores")
@@ -150,7 +141,7 @@ export default function AddScore() {
           console.error(deleteError);
 
           setError(
-            `Score was saved, but old scores could not be removed: ${deleteError.message}`
+            `Score was saved, but old scores could not be removed: ${deleteError.message}`,
           );
 
           return;
@@ -169,9 +160,7 @@ export default function AddScore() {
     } catch (error) {
       console.error(error);
 
-      setError(
-        "Something went wrong while saving your score."
-      );
+      setError("Something went wrong while saving your score.");
     } finally {
       setLoading(false);
     }
@@ -180,7 +169,6 @@ export default function AddScore() {
   return (
     <UserLayout>
       <div className="form-page score-page">
-
         <button
           type="button"
           className="back"
@@ -190,40 +178,22 @@ export default function AddScore() {
         </button>
 
         <div className="page-heading">
+          <span className="eyebrow">MY SCORES</span>
 
-          <span className="eyebrow">
-            MY SCORES
-          </span>
+          <h1>Add golf score</h1>
 
-          <h1>
-            Add golf score
-          </h1>
-
-          <p>
-            Keep your scorecard up to date to stay eligible
-            for every draw.
-          </p>
-
+          <p>Keep your scorecard up to date to stay eligible for every draw.</p>
         </div>
 
         <div className="panel score-form">
-
           <div className="score-form-intro">
-
-            <span className="score-form-icon">
-              ◎
-            </span>
+            <span className="score-form-icon">◎</span>
 
             <div>
-              <strong>
-                Log a round
-              </strong>
+              <strong>Log a round</strong>
 
-              <small>
-                We use Stableford scoring for the monthly draw.
-              </small>
+              <small>We use Stableford scoring for the monthly draw.</small>
             </div>
-
           </div>
 
           {error && (
@@ -257,7 +227,6 @@ export default function AddScore() {
           )}
 
           <label className="form-field">
-
             <span>
               Score <small>(1 - 45)</small>
             </span>
@@ -268,70 +237,77 @@ export default function AddScore() {
               max="45"
               step="1"
               value={score}
-              onChange={(e) =>
-                setScore(e.target.value)
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+
+                setScore(value);
+                setScoreError("");
+
+                if (value === "") {
+                  return;
+                }
+
+                const numericValue = Number(value);
+
+                if (
+                  !Number.isInteger(numericValue) ||
+                  numericValue < 1 ||
+                  numericValue > 45
+                ) {
+                  setScoreError(
+                    "Score must be a whole number between 1 and 45.",
+                  );
+                }
+              }}
               placeholder="Enter score"
             />
 
+            {scoreError && (
+              <small
+                style={{
+                  color: "#d93025",
+                  marginTop: "6px",
+                  display: "block",
+                }}
+              >
+                {scoreError}
+              </small>
+            )}
           </label>
 
           <label className="form-field">
-
-            <span>
-              Date
-            </span>
+            <span>Date</span>
 
             <input
               type="date"
               value={date}
-              onChange={(e) =>
-                setDate(e.target.value)
-              }
+              onClick={(event) => {
+                if (typeof event.currentTarget.showPicker === "function") {
+                  event.currentTarget.showPicker();
+                }
+              }}
+              onChange={(e) => setDate(e.target.value)}
             />
-
           </label>
 
           <div className="rules">
+            <strong>Score rules</strong>
 
-            <strong>
-              Score rules
-            </strong>
+            <span>✓ Score must be between 1 and 45</span>
 
-            <span>
-              ✓ Score must be between 1 and 45
-            </span>
+            <span>✓ Only one score per date</span>
 
-            <span>
-              ✓ Only one score per date
-            </span>
-
-            <span>
-              ✓ Only latest 5 scores are kept
-            </span>
-
+            <span>✓ Only latest 5 scores are kept</span>
           </div>
 
           <div className="score-form-footer">
+            <small>Scores can be added once per day.</small>
 
-            <small>
-              Scores can be added once per day.
-            </small>
-
-            <Button
-              type="button"
-              onClick={handleSaveScore}
-              disabled={loading}
-            >
-              {loading
-                ? "Saving..."
-                : "Save Score"}
+            <Button type="button" onClick={handleSaveScore} disabled={loading}>
+              {loading ? "Saving..." : "Save Score"}
             </Button>
-
           </div>
-
         </div>
-
       </div>
     </UserLayout>
   );

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
 
@@ -9,6 +10,9 @@ const charities = [
 ];
 
 export default function CharitySelection() {
+  const [selectedCharity, setSelectedCharity] = useState(charities[0][1]);
+  const [contribution, setContribution] = useState(10);
+
   return (
     <div className="center-page charity-page">
       <div className="page-container">
@@ -40,13 +44,23 @@ export default function CharitySelection() {
           <p>Select a cause that matters to you.</p>
         </div>
 
-        <div className="charity-list">
-          {charities.map(([icon, name, category], index) => (
+        <div
+          className="charity-list"
+          role="radiogroup"
+          aria-label="Choose a charity"
+        >
+          {charities.map(([icon, name, category]) => (
             <label
-              className={`charity-option ${index === 0 ? "selected" : ""}`}
+              className={`charity-option ${selectedCharity === name ? "selected" : ""}`}
               key={name}
             >
-              <input type="radio" name="charity" defaultChecked={index === 0} />
+              <input
+                type="radio"
+                name="charity"
+                value={name}
+                checked={selectedCharity === name}
+                onChange={() => setSelectedCharity(name)}
+              />
 
               <span className="charity-option-icon" aria-hidden="true">
                 {icon}
@@ -70,13 +84,33 @@ export default function CharitySelection() {
               <strong>Your contribution</strong>
               <small>Choose how much reaches your charity</small>
             </span>
-            <strong className="contribution-value">10%</strong>
+            <output
+              className="contribution-value"
+              htmlFor="charity-contribution"
+            >
+              {contribution}%
+            </output>
           </div>
 
-          <input type="range" min="10" max="25" defaultValue="10" />
+          <input
+            id="charity-contribution"
+            type="range"
+            min="10"
+            max="25"
+            value={contribution}
+            onChange={(event) => setContribution(Number(event.target.value))}
+            aria-label="Contribution percentage"
+          />
 
-          <small>Minimum contribution: 10% of subscription</small>
+          <div className="contribution-range-labels" aria-hidden="true">
+            <span>10% minimum</span>
+            <span>25% maximum</span>
+          </div>
         </div>
+
+        <p className="selected-charity-summary" aria-live="polite">
+          Your support is going to <strong>{selectedCharity}</strong>.
+        </p>
 
         <p className="selection-note">
           You can update your charity or contribution any time from your

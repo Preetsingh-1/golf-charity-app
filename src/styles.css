@@ -1958,6 +1958,11 @@ button {
   transform: translateY(-2px);
 }
 
+.charity-page .charity-option:focus-within {
+  outline: 3px solid rgba(22, 116, 91, 0.22);
+  outline-offset: 3px;
+}
+
 .charity-page .charity-option.selected {
   border: 2px solid var(--green-700);
   padding: 13px 15px;
@@ -2035,8 +2040,27 @@ button {
 }
 .charity-page .contribution input[type="range"] {
   width: 100%;
-  margin: 19px 0 8px;
+  margin: 19px 0 4px;
   accent-color: var(--green-700);
+  cursor: pointer;
+}
+.contribution-range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 9px;
+}
+.selected-charity-summary {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--green-700);
+  color: var(--muted);
+  background: #edf7ef;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.selected-charity-summary strong {
+  color: var(--green-900);
 }
 .charity-page .contribution > small {
   color: var(--muted);
