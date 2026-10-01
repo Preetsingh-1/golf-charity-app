@@ -13,9 +13,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setError("");
@@ -33,28 +31,45 @@ export default function Login() {
     try {
       setLoading(true);
 
-      const { error } =
-        await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
-          password,
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
       if (error) {
         setError(
           error.message === "Invalid login credentials"
             ? "Invalid email or password."
-            : error.message
+            : error.message,
         );
         return;
       }
 
-      navigate("/dashboard");
+      if (!data.user) {
+        setError("Unable to load your account. Please try again.");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profileError || !profile) {
+        console.error("Account role lookup error:", profileError);
+        await supabase.auth.signOut();
+        setError("Unable to verify your account. Please try again.");
+        return;
+      }
+
+      navigate(profile.role === "admin" ? "/admin" : "/dashboard", {
+        replace: true,
+      });
     } catch (err) {
       console.error("Login error:", err);
 
-      setError(
-        "Something went wrong. Please try again."
-      );
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -66,32 +81,24 @@ export default function Login() {
         <div className="login-showcase-top">
           <Logo />
 
-          <span className="showcase-badge">
-            PLAY • WIN • GIVE
-          </span>
+          <span className="showcase-badge">PLAY • WIN • GIVE</span>
         </div>
 
         <div className="login-showcase-copy">
-          <span className="eyebrow">
-            YOUR GAME, YOUR IMPACT
-          </span>
+          <span className="eyebrow">YOUR GAME, YOUR IMPACT</span>
 
-          <h2>
-            Every round can make a difference.
-          </h2>
+          <h2>Every round can make a difference.</h2>
 
           <p>
-            Track your scores, join the monthly draw,
-            and help a charity you care about.
+            Track your scores, join the monthly draw, and help a charity you
+            care about.
           </p>
         </div>
 
         <div className="login-showcase-stat">
           <strong>10%</strong>
 
-          <span>
-            of every subscription goes to charity
-          </span>
+          <span>of every subscription goes to charity</span>
         </div>
       </aside>
 
@@ -99,30 +106,21 @@ export default function Login() {
         <Logo />
 
         <div className="auth-heading">
-          <span className="eyebrow">
-            WELCOME BACK
-          </span>
+          <span className="eyebrow">WELCOME BACK</span>
 
           <h1>Welcome back</h1>
 
-          <p>
-            Access your Golf for Good account.
-          </p>
+          <p>Access your Golf for Good account.</p>
         </div>
 
-        <form
-          className="form"
-          onSubmit={handleLogin}
-        >
+        <form className="form" onSubmit={handleLogin}>
           <label className="login-field">
             <span>Email address</span>
 
             <input
               type="email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
             />
@@ -134,41 +132,25 @@ export default function Login() {
             <input
               type="password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               autoComplete="current-password"
             />
           </label>
 
           <div className="forgot">
-            <Link to="/forgot-password">
-              Forgot password?
-            </Link>
+            <Link to="/forgot-password">Forgot password?</Link>
           </div>
 
-          {error && (
-            <p className="form-error">
-              {error}
-            </p>
-          )}
+          {error && <p className="form-error">{error}</p>}
 
-          <Button
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Logging in..."
-              : "Login"}
+          <Button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
         <p className="form-footer">
-          Don't have an account?{" "}
-          <Link to="/signup">
-            Sign Up
-          </Link>
+          Don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
       </div>
     </div>

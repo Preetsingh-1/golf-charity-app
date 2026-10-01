@@ -36,13 +36,10 @@ export default function VerifyWinners() {
       /*
        * Get winners
        */
-      const {
-        data: winnerData,
-        error: winnerError,
-      } = await supabase
+      const { data: winnerData, error: winnerError } = await supabase
         .from("draw_winners")
         .select(
-          "id, draw_id, user_id, match_count, prize_amount, payment_status, created_at"
+          "id, draw_id, user_id, match_count, prize_amount, payment_status, created_at",
         )
         .order("created_at", { ascending: false });
 
@@ -58,17 +55,12 @@ export default function VerifyWinners() {
       /*
        * Get user IDs
        */
-      const userIds = [
-        ...new Set(winnerData.map((winner) => winner.user_id)),
-      ];
+      const userIds = [...new Set(winnerData.map((winner) => winner.user_id))];
 
       /*
        * Get profiles
        */
-      const {
-        data: profiles,
-        error: profileError,
-      } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("id, full_name, email")
         .in("id", userIds);
@@ -85,14 +77,9 @@ export default function VerifyWinners() {
       /*
        * Get proofs
        */
-      const {
-        data: proofs,
-        error: proofError,
-      } = await supabase
+      const { data: proofs, error: proofError } = await supabase
         .from("winner_proofs")
-        .select(
-          "id, winner_id, proof_url, verification_status, admin_note"
-        )
+        .select("id, winner_id, proof_url, verification_status, admin_note")
         .in("winner_id", winnerIds)
         .order("created_at", { ascending: false });
 
@@ -104,13 +91,9 @@ export default function VerifyWinners() {
        * Combine data
        */
       const formattedWinners: Winner[] = winnerData.map((winner) => {
-        const profile = profiles?.find(
-          (item) => item.id === winner.user_id
-        );
+        const profile = profiles?.find((item) => item.id === winner.user_id);
 
-        const proof = proofs?.find(
-          (item) => item.winner_id === winner.id
-        );
+        const proof = proofs?.find((item) => item.winner_id === winner.id);
 
         return {
           ...winner,
@@ -144,12 +127,9 @@ export default function VerifyWinners() {
       setProcessingId(winnerId);
       setError("");
 
-      const { error } = await supabase.rpc(
-        "admin_approve_winner",
-        {
-          p_winner_id: winnerId,
-        }
-      );
+      const { error } = await supabase.rpc("admin_approve_winner", {
+        p_winner_id: winnerId,
+      });
 
       if (error) {
         throw error;
@@ -177,13 +157,10 @@ export default function VerifyWinners() {
       setProcessingId(winnerId);
       setError("");
 
-      const { error } = await supabase.rpc(
-        "admin_reject_winner",
-        {
-          p_winner_id: winnerId,
-          p_admin_note: rejectNote.trim(),
-        }
-      );
+      const { error } = await supabase.rpc("admin_reject_winner", {
+        p_winner_id: winnerId,
+        p_admin_note: rejectNote.trim(),
+      });
 
       if (error) {
         throw error;
@@ -203,17 +180,16 @@ export default function VerifyWinners() {
 
   const pendingCount = winners.filter(
     (winner) =>
-      winner.verification_status === "pending" ||
-      !winner.verification_status
+      winner.verification_status === "pending" || !winner.verification_status,
   ).length;
 
   const approvedCount = winners.filter(
-    (winner) => winner.verification_status === "approved"
+    (winner) => winner.verification_status === "approved",
   ).length;
 
   const totalPrize = winners.reduce(
     (total, winner) => total + Number(winner.prize_amount || 0),
-    0
+    0,
   );
 
   return (
@@ -223,9 +199,7 @@ export default function VerifyWinners() {
 
         <h1>Verify Winners</h1>
 
-        <p>
-          Review winner submissions, verify proof and manage payouts.
-        </p>
+        <p>Review winner submissions, verify proof and manage payouts.</p>
 
         <div className="page-heading-meta">
           <span className="page-meta-chip page-meta-chip--warning">
@@ -262,9 +236,7 @@ export default function VerifyWinners() {
         ) : winners.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center" }}>
             <h3>No winners found</h3>
-            <p>
-              There are currently no draw winners to review.
-            </p>
+            <p>There are currently no draw winners to review.</p>
           </div>
         ) : (
           <table className="table">
@@ -305,9 +277,7 @@ export default function VerifyWinners() {
                   </td>
 
                   <td>
-                    <strong>
-                      ₹{Number(winner.prize_amount).toFixed(2)}
-                    </strong>
+                    <strong>₹{Number(winner.prize_amount).toFixed(2)}</strong>
                   </td>
 
                   <td>
@@ -358,11 +328,16 @@ export default function VerifyWinners() {
                   </td>
 
                   <td>
-                    {winner.verification_status === "approved" ? (
+                    {winner.payment_status === "paid" ? (
                       <span className="page-meta-chip page-meta-chip--positive">
                         Payment Released
                       </span>
-                    ) : (
+                    ) : winner.verification_status === "approved" ? (
+                      <span className="page-meta-chip page-meta-chip--positive">
+                        Approved - Payment Pending
+                      </span>
+                    ) : winner.proof_url &&
+                      winner.verification_status === "pending" ? (
                       <div
                         style={{
                           display: "flex",
@@ -374,9 +349,7 @@ export default function VerifyWinners() {
                           type="button"
                           className="button button-primary"
                           disabled={processingId === winner.id}
-                          onClick={() =>
-                            handleApprove(winner.id)
-                          }
+                          onClick={() => handleApprove(winner.id)}
                         >
                           {processingId === winner.id
                             ? "Processing..."
@@ -395,6 +368,12 @@ export default function VerifyWinners() {
                           Reject
                         </button>
                       </div>
+                    ) : winner.verification_status === "rejected" ? (
+                      <span className="page-meta-chip page-meta-chip--warning">
+                        Awaiting corrected proof
+                      </span>
+                    ) : (
+                      <span className="page-meta-chip">Awaiting proof</span>
                     )}
                   </td>
                 </tr>
@@ -470,13 +449,9 @@ export default function VerifyWinners() {
                 type="button"
                 className="button button-primary"
                 disabled={processingId === rejectingId}
-                onClick={() =>
-                  handleReject(rejectingId)
-                }
+                onClick={() => handleReject(rejectingId)}
               >
-                {processingId === rejectingId
-                  ? "Rejecting..."
-                  : "Reject Proof"}
+                {processingId === rejectingId ? "Rejecting..." : "Reject Proof"}
               </button>
             </div>
           </div>

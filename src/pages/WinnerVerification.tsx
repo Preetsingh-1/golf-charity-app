@@ -144,6 +144,7 @@ export default function WinnerVerification() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setError("");
     setMessage("");
+    setFile(null);
 
     const selectedFile = event.target.files?.[0];
 
@@ -427,7 +428,7 @@ export default function WinnerVerification() {
               Upload a clear screenshot of your golf score for verification.
             </p>
 
-            {proof ? (
+            {proof && proof.verification_status !== "rejected" ? (
               <div className="proof-submitted">
                 <strong>Proof submitted</strong>
 
@@ -448,8 +449,20 @@ export default function WinnerVerification() {
               </div>
             ) : (
               <>
+                {proof?.verification_status === "rejected" && (
+                  <div className="verification-message verification-message--error">
+                    <strong>Previous proof was rejected.</strong>
+                    {proof.admin_note && <p>{proof.admin_note}</p>}
+                    <p>
+                      Upload a corrected scorecard to request another review.
+                    </p>
+                  </div>
+                )}
+
                 <label className="upload-box">
-                  <span className="upload-icon">↑</span>
+                  <span className="upload-icon" aria-hidden="true">
+                    ↑
+                  </span>
 
                   <strong>{file ? file.name : "Click to upload"}</strong>
 

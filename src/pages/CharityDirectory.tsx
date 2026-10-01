@@ -1,49 +1,68 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import Logo from "../components/Logo";
+import { useEffect, useState } from "react";
+import PublicHeader from "../components/PublicHeader";
+import { supabase } from "../lib/supabaseClient";
 
-const charities = [
-  {
-    id: "green-earth",
-    icon: "🌱",
-    name: "Green Earth Foundation",
-    category: "Environment",
-    description: "Supporting environmental protection and sustainability.",
-  },
-  {
-    id: "hope-children",
-    icon: "❤️",
-    name: "Hope for Children",
-    category: "Child Welfare",
-    description: "Helping children access education, healthcare and support.",
-  },
-  {
-    id: "health-all",
-    icon: "🤲",
-    name: "Health for All",
-    category: "Healthcare",
-    description: "Working to improve access to essential healthcare.",
-  },
-  {
-    id: "education-first",
-    icon: "📚",
-    name: "Education First",
-    category: "Education",
-    description: "Creating better educational opportunities for children.",
-  },
-];
-
-const categories = Array.from(
-  new Set(charities.map((charity) => charity.category)),
-);
+type Charity = {
+  id: string;
+  name: string;
+  category?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  status?: string | null;
+};
 
 export default function CharityDirectory() {
+  const [charities, setCharities] = useState<Charity[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All categories");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCharities = async () => {
+      const { data, error: charityError } = await supabase
+        .from("charities")
+        .select("*")
+        .order("name");
+
+      if (!mounted) return;
+
+      if (charityError) {
+        console.error("Charity directory load error:", charityError);
+        setError("Unable to load charity partners. Please try again later.");
+      } else {
+        setCharities(
+          ((data || []) as Charity[]).filter(
+            (charity) =>
+              !charity.status || charity.status.toLowerCase() === "active",
+          ),
+        );
+      }
+
+      setLoading(false);
+    };
+
+    void loadCharities();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const categories = Array.from(
+    new Set(
+      charities
+        .map((charity) => charity.category)
+        .filter((category): category is string => Boolean(category)),
+    ),
+  );
 
   const filteredCharities = charities.filter((charity) => {
     const matchesSearch =
-      `${charity.name} ${charity.category} ${charity.description}`
+      `${charity.name} ${charity.category || ""} ${charity.description || ""}`
         .toLowerCase()
         .includes(search.trim().toLowerCase());
     const matchesCategory =
@@ -55,16 +74,7 @@ export default function CharityDirectory() {
 
   return (
     <div>
-      <header className="header">
-        <Logo />
-
-        <div className="header-actions">
-          <Link to="/login">Login</Link>
-          <Link to="/signup" className="btn btn-primary">
-            Sign Up
-          </Link>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="directory-page">
         <section className="directory-intro">
@@ -75,7 +85,7 @@ export default function CharityDirectory() {
           </div>
 
           <div className="directory-intro-stat">
-            <strong>{charities.length}</strong>
+            <strong>{loading ? "—" : charities.length}</strong>
             <span>causes to explore</span>
           </div>
         </section>
@@ -114,23 +124,33 @@ export default function CharityDirectory() {
             </span>
           </div>
 
-          {filteredCharities.length > 0 ? (
+          {loading ? (
+            <div className="directory-empty" role="status">
+              Loading charity partners...
+            </div>
+          ) : error ? (
+            <div className="directory-empty" role="alert">
+              {error}
+            </div>
+          ) : filteredCharities.length > 0 ? (
             <div className="directory-grid">
               {filteredCharities.map((charity) => (
                 <article className="directory-card" key={charity.id}>
                   <div
                     className={`directory-image directory-image--${charity.id}`}
                   >
-                    <span aria-hidden="true">{charity.icon}</span>
+                    <span aria-hidden="true">{charity.icon || "♡"}</span>
                     <span className="directory-image-label">
                       Golf for Good partner
                     </span>
                   </div>
 
                   <div className="directory-content">
-                    <span className="category">{charity.category}</span>
+                    {charity.category && (
+                      <span className="category">{charity.category}</span>
+                    )}
                     <h3>{charity.name}</h3>
-                    <p>{charity.description}</p>
+                    <p>{charity.description || "Supporting our community."}</p>
                     <Link to={`/charities/${charity.id}`}>
                       Explore this cause <span aria-hidden="true">→</span>
                     </Link>

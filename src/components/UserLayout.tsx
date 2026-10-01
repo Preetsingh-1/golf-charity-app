@@ -51,6 +51,8 @@ export default function UserLayout({ children }: Props) {
           <NavLink to="/draw-results">◉ Draws</NavLink>
 
           <NavLink to="/winner-verification">★ Winnings</NavLink>
+
+          <NavLink to="/profile">⚙ Profile & Settings</NavLink>
         </nav>
 
         <button type="button" className="logout" onClick={handleLogout}>
